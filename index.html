@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EA Converter</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b1220;
+    color: white;
+}
+
+header {
+    padding: 20px;
+    text-align: center;
+    background: #111b2e;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: #111b2e;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: 100%;
+    min-height: 350px;
+    background: #050912;
+    color: #00ff9d;
+    border: 1px solid #26344f;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: monospace;
+    resize: vertical;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    background: #00c853;
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+#fileName {
+    margin-top: 10px;
+    color: #aaa;
+}
+
+.status {
+    margin-top: 15px;
+    color: #00ff9d;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🤖 EA Converter</h1>
+    <p>MT5 Expert Advisor Editor</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Upload EA</h2>
+
+        <input type="file" id="fileInput" accept=".mq5">
+
+        <div id="fileName">
+            No EA selected
+        </div>
+    </div>
+
+    <div class="card">
+
+        <h2>EA Code</h2>
+
+        <textarea id="code" placeholder="Paste your MQL5 EA code here..."></textarea>
+
+        <br>
+
+        <button onclick="changeLotSize()">
+            Change Lot Size
+        </button>
+
+        <button onclick="downloadEA()">
+            Download EA
+        </button>
+
+        <div class="status" id="status"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+let fileName = "converted_EA.mq5";
+
+document.getElementById("fileInput").addEventListener("change", function(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    fileName = file.name;
+
+    document.getElementById("fileName").innerText =
+        "Selected: " + file.name;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        document.getElementById("code").value = e.target.result;
+    };
+
+    reader.readAsText(file);
+});
+
+
+function changeLotSize() {
+
+    const code = document.getElementById("code");
+
+    let newLot = prompt("Enter new lot size:", "0.01");
+
+    if (!newLot) return;
+
+    code.value = code.value.replace(
+        /LotSize\s*=\s*[0-9.]+/gi,
+        "LotSize = " + newLot
+    );
+
+    document.getElementById("status").innerText =
+        "Lot size updated to " + newLot;
+}
+
+
+function downloadEA() {
+
+    const code = document.getElementById("code").value;
+
+    if (!code.trim()) {
+        alert("Please upload or paste an EA first.");
+        return;
+    }
+
+    const blob = new Blob([code], {
+        type: "text/plain"
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.download = fileName || "converted_EA.mq5";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+</script>
+
+</body>
+</html>
